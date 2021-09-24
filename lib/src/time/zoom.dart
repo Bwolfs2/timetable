@@ -22,8 +22,7 @@ class TimeZoom extends StatefulWidget {
   _TimeZoomState createState() => _TimeZoomState();
 }
 
-class _TimeZoomState extends State<TimeZoom>
-    with SingleTickerProviderStateMixin {
+class _TimeZoomState extends State<TimeZoom> with SingleTickerProviderStateMixin {
   // Taken from [_InteractiveViewerState._kDrag].
   static const _kDrag = 0.0000135;
   late AnimationController _animationController;
@@ -36,14 +35,10 @@ class _TimeZoomState extends State<TimeZoom>
 
   // Layouts the child so only [_controller.value] out of [_controller.maxRange]
   // is visible.
-  double get _outerChildHeight =>
-      _parentHeight *
-      (_controller!.maxRange.duration / _controller!.value.duration);
+  double get _outerChildHeight => _parentHeight * (_controller!.maxRange.duration / _controller!.value.duration);
   double get _outerOffset {
     final timeRange = _controller!.value;
-    return (timeRange.startTime - _controller!.maxRange.startTime) /
-        _controller!.maxRange.duration *
-        _outerChildHeight;
+    return (timeRange.startTime - _controller!.maxRange.startTime) / _controller!.maxRange.duration * _outerChildHeight;
   }
 
   late TimeRange? _initialRange;
@@ -59,8 +54,7 @@ class _TimeZoomState extends State<TimeZoom>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _controller?.removeListener(_onControllerChanged);
-    _controller = DefaultTimeController.of(context)!
-      ..addListener(_onControllerChanged);
+    _controller = DefaultTimeController.of(context)!..addListener(_onControllerChanged);
     _scrollController?.dispose();
     _scrollController = null;
   }
@@ -95,8 +89,7 @@ class _TimeZoomState extends State<TimeZoom>
             // If this widget is used in a scrollable context, then the outer
             // scrollable view would always win in the gesture arena because it
             // uses `computeHitSlop` which is half that amount.
-            _ScaleGestureRecognizer:
-                GestureRecognizerFactoryWithHandlers<_ScaleGestureRecognizer>(
+            _ScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<_ScaleGestureRecognizer>(
               () => _ScaleGestureRecognizer(debugOwner: this),
               (instance) {
                 instance
@@ -115,10 +108,8 @@ class _TimeZoomState extends State<TimeZoom>
                 builder: (context, _, child) {
                   // Layouts the child so only [_controller.maxRange] is
                   // visible.
-                  final innerChildHeight = _outerChildHeight *
-                      (1.days / _controller!.maxRange.duration);
-                  final innerOffset = -innerChildHeight *
-                      (_controller!.maxRange.startTime / 1.days);
+                  final innerChildHeight = _outerChildHeight * (1.days / _controller!.maxRange.duration);
+                  final innerOffset = -innerChildHeight * (_controller!.maxRange.startTime / 1.days);
 
                   return SizedBox(
                     height: _outerChildHeight,
@@ -146,18 +137,14 @@ class _TimeZoomState extends State<TimeZoom>
     final rawScale = details.verticalScale;
     assert(rawScale >= 0);
     final Duration newDuration;
-    if (rawScale <= 0 ||
-        _initialRange!.duration.inMicroseconds /
-                _controller!.maxDuration.inMicroseconds >=
-            rawScale) {
+    if (rawScale <= 0 || _initialRange!.duration.inMicroseconds / _controller!.maxDuration.inMicroseconds >= rawScale) {
       // When `rawScale` approaches zero, `1 / rawScale` in the `else`-branch
       // can become infinity, producing an error when multiplying a `Duration`
       // with it. Hence, we catch this early and coerce the `newDuration` to the
       // maximum possible value directly.
       newDuration = _controller!.maxDuration;
     } else {
-      newDuration = (_initialRange!.duration * (1 / rawScale))
-          .coerceIn(_controller!.minDuration, _controller!.maxDuration);
+      newDuration = (_initialRange!.duration * (1 / rawScale)).coerceIn(_controller!.minDuration, _controller!.maxDuration);
     }
 
     final newFocus = _focusToDuration(details.localFocalPoint.dy, newDuration);
@@ -176,16 +163,12 @@ class _TimeZoomState extends State<TimeZoom>
     final velocity = details.velocity.pixelsPerSecond.dy;
     if (velocity.abs() < kMinFlingVelocity) return;
 
-    final frictionSimulation =
-        FrictionSimulation(_kDrag, _outerOffset, -velocity);
+    final frictionSimulation = FrictionSimulation(_kDrag, _outerOffset, -velocity);
 
     const effectivelyMotionless = 10.0;
-    final finalTime = math.log(effectivelyMotionless / velocity.abs()) /
-        math.log(_kDrag / 100);
+    final finalTime = math.log(effectivelyMotionless / velocity.abs()) / math.log(_kDrag / 100);
 
-    _animation =
-        Tween<double>(begin: _outerOffset, end: frictionSimulation.finalX)
-            .animate(
+    _animation = Tween<double>(begin: _outerOffset, end: frictionSimulation.finalX).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.decelerate),
     );
     _animationController.duration = finalTime.seconds;
@@ -202,8 +185,7 @@ class _TimeZoomState extends State<TimeZoom>
     }
 
     final controller = _controller!;
-    final offsetFromStartTime =
-        controller.maxRange.duration * (_animation!.value / _outerChildHeight);
+    final offsetFromStartTime = controller.maxRange.duration * (_animation!.value / _outerChildHeight);
     _setNewTimeRange(
       controller.maxRange.startTime + offsetFromStartTime,
       controller.value.duration,
@@ -225,8 +207,7 @@ class _TimeZoomState extends State<TimeZoom>
       _controller!.maxRange.startTime,
       _controller!.maxRange.endTime - duration,
     );
-    _controller!.value =
-        TimeRange.fromStartAndDuration(actualStartTime, duration);
+    _controller!.value = TimeRange.fromStartAndDuration(actualStartTime, duration);
   }
 }
 
@@ -377,8 +358,7 @@ class _RenderVerticalOverflowBox extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) =>
-      _getInnerConstraints(constraints).biggest;
+  Size computeDryLayout(BoxConstraints constraints) => _getInnerConstraints(constraints).biggest;
 
   @override
   void performLayout() {
@@ -391,8 +371,7 @@ class _RenderVerticalOverflowBox extends RenderShiftedBox {
     size = Size(child!.size.width, constraints.maxHeight);
   }
 
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) =>
-      constraints.copyWith(minHeight: height, maxHeight: height);
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) => constraints.copyWith(minHeight: height, maxHeight: height);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -436,12 +415,8 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0 ? _currentSpan / _initialSpan : 1;
-  double get _horizontalScaleFactor => _initialHorizontalSpan > 0
-      ? _currentHorizontalSpan / _initialHorizontalSpan
-      : 1;
-  double get _verticalScaleFactor => _initialVerticalSpan > 0
-      ? _currentVerticalSpan / _initialVerticalSpan
-      : 1;
+  double get _horizontalScaleFactor => _initialHorizontalSpan > 0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1;
+  double get _verticalScaleFactor => _initialVerticalSpan > 0 ? _currentVerticalSpan / _initialVerticalSpan : 1;
 
   double _computeRotationFactor() {
     if (_initialLine == null || _currentLine == null) return 0;
@@ -485,8 +460,7 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     var shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
       final tracker = _velocityTrackers[event.pointer]!;
-      if (!event.synthesized)
-        tracker.addPosition(event.timeStamp, event.position);
+      if (!event.synthesized) tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
       _lastTransform = event.transform;
@@ -506,8 +480,7 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _updateLines();
     _update();
 
-    if (!didChangeConfiguration || _reconfigure(event.pointer))
-      _advanceStateMachine(shouldStartIfAccepted, event.kind);
+    if (!didChangeConfiguration || _reconfigure(event.pointer)) _advanceStateMachine(shouldStartIfAccepted, event.kind);
     stopTrackingIfPointerNoLongerDown(event);
   }
 
@@ -516,10 +489,8 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     // Compute the focal point
     var focalPoint = Offset.zero;
-    for (final pointer in _pointerLocations.keys)
-      focalPoint += _pointerLocations[pointer]!;
-    _currentFocalPoint =
-        count > 0 ? focalPoint / count.toDouble() : Offset.zero;
+    for (final pointer in _pointerLocations.keys) focalPoint += _pointerLocations[pointer]!;
+    _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
 
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
@@ -528,12 +499,9 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     var totalHorizontalDeviation = 0.0;
     var totalVerticalDeviation = 0.0;
     for (final pointer in _pointerLocations.keys) {
-      totalDeviation +=
-          (_currentFocalPoint - _pointerLocations[pointer]!).distance;
-      totalHorizontalDeviation +=
-          (_currentFocalPoint.dx - _pointerLocations[pointer]!.dx).abs();
-      totalVerticalDeviation +=
-          (_currentFocalPoint.dy - _pointerLocations[pointer]!.dy).abs();
+      totalDeviation += (_currentFocalPoint - _pointerLocations[pointer]!).distance;
+      totalHorizontalDeviation += (_currentFocalPoint.dx - _pointerLocations[pointer]!.dx).abs();
+      totalVerticalDeviation += (_currentFocalPoint.dy - _pointerLocations[pointer]!.dy).abs();
     }
     _currentSpan = count > 0 ? totalDeviation / count : 0.0;
     _currentHorizontalSpan = count > 0 ? totalHorizontalDeviation / count : 0.0;
@@ -547,9 +515,7 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     /// In case of just one pointer registered, reconfigure [_initialLine]
     if (count < 2) {
       _initialLine = _currentLine;
-    } else if (_initialLine != null &&
-        _initialLine!.pointerStartId == _pointerQueue[0] &&
-        _initialLine!.pointerEndId == _pointerQueue[1]) {
+    } else if (_initialLine != null && _initialLine!.pointerStartId == _pointerQueue[0] && _initialLine!.pointerEndId == _pointerQueue[1]) {
       /// Rotation updated, set the [_currentLine]
       _currentLine = _LineBetweenPointers(
         pointerStartId: _pointerQueue[0],
@@ -582,21 +548,11 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         var velocity = tracker.getVelocity();
         if (_isFlingGesture(velocity)) {
           final pixelsPerSecond = velocity.pixelsPerSecond;
-          if (pixelsPerSecond.distanceSquared >
-              kMaxFlingVelocity * kMaxFlingVelocity)
-            velocity = Velocity(
-                pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) *
-                    kMaxFlingVelocity);
-          invokeCallback<void>(
-              'onEnd',
-              () => onEnd!(ScaleEndDetails(
-                  velocity: velocity, pointerCount: _pointerQueue.length)));
+          if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+            velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, pointerCount: _pointerQueue.length)));
         } else {
-          invokeCallback<void>(
-              'onEnd',
-              () => onEnd!(ScaleEndDetails(
-                  velocity: Velocity.zero,
-                  pointerCount: _pointerQueue.length)));
+          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: Velocity.zero, pointerCount: _pointerQueue.length)));
         }
       }
       _state = _ScaleState.accepted;
@@ -613,12 +569,10 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (_state == _ScaleState.possible) {
       final spanDelta = (_currentSpan - _initialSpan).abs();
-      final focalPointDelta =
-          (_currentFocalPoint - _initialFocalPoint).distance;
+      final focalPointDelta = (_currentFocalPoint - _initialFocalPoint).distance;
       // Change: We use the hit slop instead of the pan slop to allow scrolling
       // even inside a scrollable parent.
-      if (spanDelta > computeScaleSlop(pointerDeviceKind) ||
-          focalPointDelta > computeHitSlop(pointerDeviceKind))
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computeHitSlop(pointerDeviceKind, null))
         resolve(GestureDisposition.accepted);
     } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);
@@ -636,8 +590,7 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           horizontalScale: _horizontalScaleFactor,
           verticalScale: _verticalScaleFactor,
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(
-              _lastTransform, _currentFocalPoint),
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
         ));
@@ -650,8 +603,7 @@ class _ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       invokeCallback<void>('onStart', () {
         onStart!(ScaleStartDetails(
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(
-              _lastTransform, _currentFocalPoint),
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           pointerCount: _pointerQueue.length,
         ));
       });
@@ -736,8 +688,7 @@ class _LineBetweenPointers {
 /// retrieve the appropriate offset using `getOffset`, which calculates it from
 /// the `TimeController`.
 class _ScrollController extends ScrollController {
-  _ScrollController({required this.getOffset})
-      : super(initialScrollOffset: getOffset());
+  _ScrollController({required this.getOffset}) : super(initialScrollOffset: getOffset());
 
   final ValueGetter<double> getOffset;
 
